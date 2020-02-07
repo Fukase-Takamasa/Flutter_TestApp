@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Test1'),
+      home: MyHomePage(title: 'ArsagaLibraryBooks'),
     );
   }
 }
@@ -41,14 +41,49 @@ class Issue {
 }
 
 
+//    _をつけるとfilePrivate的な  extendsは継承のこと(上で作ったカスタムクラスを継承/overrideなどしてる）
 class _MyHomePageState extends State<MyHomePage> {
+  PageController _pageController;
+  int _page = 0;
+
   List<Issue> _issues = <Issue>[];
 
   @override
   void initState() {
     super.initState();
+
+    _pageController = PageController();
+
+    //API叩いてるメソッド
     _load();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    _pageController.dispose();
+  }
+
+
+  //-----------メソッドを定義--------------
+
+  void onPageChanged(int page) {
+    setState(() {
+      this._page = page;
+    });
+  }
+
+  void onTapBottomNavigationBar(int page) {
+    _pageController.animateToPage(
+        page,
+        duration: const Duration(milliseconds: 300), //0.3秒
+        curve: Curves.ease
+    );
+  }
+
+  //-------------------------------------
+
 
   Future<void> _load() async {
     final res = await http.get('https://www.googleapis.com/books/v1/volumes?q=伊坂幸太郎');
@@ -89,13 +124,26 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       ),
 
-//      bottomNavigationBar: BottomNavigationBar(
-////        items: [
-////          BottomNavigationBarItem(),
-////          BottomNavigationBarItem()
-////
-////        ]
-////      ),
+//      body: PageView(
+//        controller: _pageController,
+//        onPageChanged: onPageChanged,
+//      ),
+
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _page,
+//        onTap: onTapBottomNavigationBar,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.library_books),
+            title: Text("Library")
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            title: Text("Home")
+          ),
+        ],
+      ),
     );
   }
 }
