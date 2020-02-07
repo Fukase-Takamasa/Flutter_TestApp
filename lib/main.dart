@@ -33,11 +33,11 @@ class MyHomePage extends StatefulWidget {
 class Issue {
   Issue({
     this.title,
-    this.avatarUrl,
+    this.thumbnail,
   });
 
   final String title;
-  final String avatarUrl;
+  final String thumbnail;
 }
 
 
@@ -51,20 +51,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _load() async {
-    final res = await http.get('https://api.github.com/repositories/31792824/issues');
+    final res = await http.get('https://www.googleapis.com/books/v1/volumes?q=伊坂幸太郎');
     final data = json.decode(res.body);
     setState(() {
-      final issues = data as List;
+      final jsonRoot = data as Map;
+      final issues = jsonRoot['items'] as List;
       issues.forEach((dynamic element) {
         final issue = element as Map;
         _issues.add(Issue(
-          title: issue['title'] as String,
-          avatarUrl: issue['user']['avatar_url'] as String,
+          title: issue['volumeInfo']['title'] as String,
+          thumbnail: issue['volumeInfo']['imageLinks']['smallThumbnail'] as String,
         ));
       });
     });
   }
 
+  //ここでUIに関する諸々の設定ができる
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,14 +83,19 @@ class _MyHomePageState extends State<MyHomePage> {
         final issue = _issues[index];
 
         return ListTile(
-          leading: ClipOval(
-            child: Image.network(issue.avatarUrl),
-          ),
-
+          leading: Image.network(issue.thumbnail),
           title: Text(issue.title),
         );
       },
       ),
+
+//      bottomNavigationBar: BottomNavigationBar(
+////        items: [
+////          BottomNavigationBarItem(),
+////          BottomNavigationBarItem()
+////
+////        ]
+////      ),
     );
   }
 }
